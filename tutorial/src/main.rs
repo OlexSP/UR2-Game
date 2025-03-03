@@ -14,7 +14,7 @@ impl Default for GameState {
          high_score: 0,
          current_score: 0,
          enemy_labels: Vec::new(),
-         spawn_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
+         spawn_timer: Timer::from_seconds(1.0, TimerMode::Once),
       }
    }
 }
@@ -25,6 +25,12 @@ fn main() {
    let mut game = Game::new();
 
    // get your game stuff ready here
+   let game_state = GameState::default();
+   game.add_logic(game_logic); // Don't forget to add the logic function to the game!
+   game.run(game_state);
+}
 
-   game.run(GameState::default());
+fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
+   game_state.current_score += 1;
+   println!("Current score: {}", game_state.current_score);
 }
