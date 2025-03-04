@@ -5,19 +5,21 @@ use rusty_engine::prelude::KeyCode::{Down, Left, Right, Up, A, D, S, W};
 
 #[derive(Resource)]
 struct GameState {
-   high_score: u32,
+   // high_score: u32,
    current_score: u32,
-   enemy_labels: Vec<String>,
-   spawn_timer: Timer,
+   ferris_index: i32,
+   // enemy_labels: Vec<String>,
+   // spawn_timer: Timer,
 }
 
 impl Default for GameState {
    fn default() -> Self {
       Self {
-         high_score: 0,
+         // high_score: 0,
          current_score: 0,
-         enemy_labels: Vec::new(),
-         spawn_timer: Timer::from_seconds(1.0, TimerMode::Once),
+         ferris_index: 0,
+         // enemy_labels: Vec::new(),
+         // spawn_timer: Timer::from_seconds(1.0, TimerMode::Once),
       }
    }
 }
@@ -81,6 +83,17 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
    }
    if engine.keyboard_state.pressed_any(&[Right, D]) {
       player.translation.x += MOVEMENT_SPEED * engine.delta_f32;
+   }
+
+   // handle mouse input
+   if engine.mouse_state.just_pressed(MouseButton::Left) {
+      if let Some(mouse_location) = engine.mouse_state.location() {
+         let label = format!("ferris_{}", game_state.ferris_index);
+         game_state.ferris_index += 1;
+         let ferris = engine.add_sprite(&label.clone(), SpritePreset::RacingConeStraight);
+         ferris.translation = mouse_location;
+         ferris.collision = true;
+      }
    }
 
 }
