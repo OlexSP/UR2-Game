@@ -1,6 +1,7 @@
 #![allow(dead_code, unused_variables)]
 
 use rusty_engine::prelude::*;
+use rusty_engine::prelude::KeyCode::{Down, Left, Right, Up, A, D, S, W};
 
 #[derive(Resource)]
 struct GameState {
@@ -53,6 +54,7 @@ const UI_BOTTOM_LAYER: f32 = 3.0;
 const UI_TOP_LAYER: f32 = 4.0;
 
 fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
+   // handle collisions
    for event in engine.collision_events.drain(..) {
       if event.state == CollisionState::Begin && event.pair.one_starts_with("player"){
          // remove the sprite the player is colliding with
@@ -65,7 +67,20 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
           println!("Current score: {}", game_state.current_score);
       }
    };
-
+   // handle movements
    let player = engine.sprites.get_mut("player").unwrap();
-   player.translation.x += 100.0 * engine.delta_f32;
+   const MOVEMENT_SPEED: f32 = 100.0;
+   if engine.keyboard_state.pressed_any(&[Up, W]) {
+      player.translation.y += MOVEMENT_SPEED * engine.delta_f32;
+   }
+   if engine.keyboard_state.pressed_any(&[Down, S]) {
+      player.translation.y -= MOVEMENT_SPEED * engine.delta_f32;
+   }
+   if engine.keyboard_state.pressed_any(&[Left, A]) {
+      player.translation.x -= MOVEMENT_SPEED * engine.delta_f32;
+   }
+   if engine.keyboard_state.pressed_any(&[Right, D]) {
+      player.translation.x += MOVEMENT_SPEED * engine.delta_f32;
+   }
+
 }
