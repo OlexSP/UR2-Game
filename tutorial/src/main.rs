@@ -1,15 +1,17 @@
 #![allow(dead_code, unused_variables)]
 
 use rusty_engine::prelude::*;
-use rusty_engine::prelude::KeyCode::{Down, Left, Right, Up, A, D, S, W};
+use rusty_engine::prelude::KeyCode::{Down, Left, Right, Up, A, D, Q, S, W};
+use rand::prelude::*;
+use rand::{rng};
 
 #[derive(Resource)]
 struct GameState {
    high_score: u32,
    score: u32,
-   ferris_index: i32,
+   cone_index: i32,
    // enemy_labels: Vec<String>,
-   // spawn_timer: Timer,
+   spawn_timer: Timer,
 }
 
 impl Default for GameState {
@@ -17,9 +19,9 @@ impl Default for GameState {
       Self {
          high_score: 0,
          score: 0,
-         ferris_index: 0,
+         cone_index: 0,
          // enemy_labels: Vec::new(),
-         // spawn_timer: Timer::from_seconds(1.0, TimerMode::Once),
+         spawn_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
       }
    }
 }
@@ -28,7 +30,17 @@ impl Default for GameState {
 
 fn main() {
    let mut game = Game::new();
-   game.show_colliders = false;
+   //game.show_colliders = false;
+
+   // set window settings
+   game.window_settings(Window {
+      title: "Tutorial!".to_string(),
+      //resolution: WindowResolution::new(500.0, 500.0),
+      ..Default::default()
+   });
+
+   // set ambient audio
+   game.audio_manager.play_music(MusicPreset::WhimsicalPopsicle, 0.12);
 
    let game_state = GameState::default();
 
@@ -67,6 +79,21 @@ const UI_BOTTOM_LAYER: f32 = 3.0;
 const UI_TOP_LAYER: f32 = 4.0;
 
 fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
+   // quit the game if Q is pressed
+   if engine.keyboard_state.just_pressed(Q) {
+      engine.should_exit = true;
+   }
+   // keep text near the edges of the screen
+   let offset = ((engine.time_since_startup_f64 * 3.0).cos() * 5.0) as f32;
+
+   let score = engine.texts.get_mut("score").unwrap();
+   score.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
+   score.translation.y = engine.window_dimensions.y / 2.0 - 30.0 + offset;
+
+   let high_score = engine.texts.get_mut("high_score").unwrap();
+   high_score.translation.x = -(engine.window_dimensions.x / 2.0) + 100.0;
+   high_score.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
+
    // handle collisions
    for event in engine.collision_events.drain(..) {
       if event.state == CollisionState::Begin && event.pair.one_starts_with("player"){
@@ -85,6 +112,8 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
             let high_score_text = engine.texts.get_mut("high_score").unwrap();
             high_score_text.value = format!("High score: {}", game_state.high_score);
          }
+         // collision sound
+         engine.audio_manager.play_sfx(SfxPreset::Tones1, 0.1);
       }
    };
    // handle movements
@@ -106,12 +135,21 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
    // handle mouse input
    if engine.mouse_state.just_pressed(MouseButton::Left) {
       if let Some(mouse_location) = engine.mouse_state.location() {
-         let label = format!("ferris_{}", game_state.ferris_index);
-         game_state.ferris_index += 1;
-         let ferris = engine.add_sprite(&label.clone(), SpritePreset::RacingConeStraight);
-         ferris.translation = mouse_location;
-         ferris.collision = true;
+         let label = format!("cone_{}", game_state.cone_index);
+         game_state.cone_index += 1;
+         let cone = engine.add_sprite(&label.clone(), SpritePreset::RacingConeStraight);
+         cone.translation = mouse_location;
+         cone.collision = true;
       }
+   }
+   // random sprite appearing
+   if game_state.spawn_timer.tick(engine.delta).just_finished() {
+      let label = format!("ferris_{}", game_state.cone_index);
+      game_state.cone_index += 1;
+      let ferris = engine.add_sprite(&label.clone(), SpritePreset::RacingConeStraight);
+      ferris.translation.x = rng().random_range(-550.0..550.0);
+      ferris.translation.y = rng().random_range(-325.0..325.0);
+      ferris.collision = true;
    }
 
    // reset score
