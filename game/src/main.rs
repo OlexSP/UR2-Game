@@ -1,4 +1,5 @@
 #![allow(dead_code, unused_variables)]
+
 use rusty_engine::prelude::*;
 
 #[derive(Resource)]
@@ -17,6 +18,7 @@ impl Default for GameState {
 }
 
 const PLAYER_SPEED: f32 = 250.0;
+const ROAD_SPEED: f32 = 400.0;
 
 fn main() {
     let mut game = Game::new();
@@ -30,6 +32,12 @@ fn main() {
     player1.translation = Vec2::new(-500.0, 0.0);
     player1.layer = 10.0;
     player1.collision = true;
+
+    for i in 0..10 {
+        let roadline = game.add_sprite(format!("roadline{}", i), SpritePreset::RacingBarrierWhite);
+        roadline.scale = 0.2;
+        roadline.translation.x = -600.0 + i as f32 * 150.0;
+    }
 
     // text plates
     let health = game.add_text("health", format!("Health: {}", game_state.health_amount));
@@ -62,6 +70,15 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
     let health = engine.texts.get_mut("health").unwrap();
     health.value = format!("Health: {}", game_state.health_amount);
     health.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
-    health.translation.y = engine.window_dimensions.y / 2.0 - 30.0
+    health.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
 
+    // move road objects
+    for sprite in engine.sprites.values_mut() {
+        if sprite.label.starts_with("roadline") {
+            sprite.translation.x -= ROAD_SPEED * engine.delta_f32;
+            if sprite.translation.x < -675.0 {
+                sprite.translation.x += 1500.0;
+            }
+        }
+    }
 }
