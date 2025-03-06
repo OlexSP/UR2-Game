@@ -1,6 +1,8 @@
 #![allow(dead_code, unused_variables)]
 
 use rusty_engine::prelude::*;
+use rand::prelude::*;
+use rand::rng;
 
 #[derive(Resource)]
 struct GameState {
@@ -27,16 +29,32 @@ fn main() {
     // music
     game.audio_manager.play_music(MusicPreset::WhimsicalPopsicle, 0.2);
 
-    // add sprite
+    // add player sprite
     let player1 = game.add_sprite("player1", SpritePreset::RacingCarBlue);
     player1.translation = Vec2::new(-500.0, 0.0);
     player1.layer = 10.0;
     player1.collision = true;
 
+    // add road lines
     for i in 0..10 {
         let roadline = game.add_sprite(format!("roadline{}", i), SpritePreset::RacingBarrierWhite);
         roadline.scale = 0.2;
         roadline.translation.x = -600.0 + i as f32 * 150.0;
+    }
+
+    // add road obstacles
+    let obstacle_presets = vec![
+        SpritePreset::RacingBarrelBlue,
+        SpritePreset::RacingBarrelRed,
+        SpritePreset::RacingConeStraight,
+    ];
+
+    for (i, preset) in obstacle_presets.into_iter().enumerate() {
+        let obstacle = game.add_sprite(format!("obstacle{}", i), preset);
+        obstacle.layer = 5.0;
+        obstacle.translation.x = rng().random_range(800.0..1600.0);
+        obstacle.translation.y = rng().random_range(-300.0..300.0);
+        obstacle.collision = true;
     }
 
     // text plates
@@ -78,6 +96,13 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
             sprite.translation.x -= ROAD_SPEED * engine.delta_f32;
             if sprite.translation.x < -675.0 {
                 sprite.translation.x += 1500.0;
+            }
+        }
+        if sprite.label.starts_with("obstacle") {
+            sprite.translation.x -= ROAD_SPEED * engine.delta_f32;
+            if sprite.translation.x < -800.0 {
+                sprite.translation.x = rng().random_range(800.0..1600.0);
+                sprite.translation.y = rng().random_range(-300.0..300.0);
             }
         }
     }
