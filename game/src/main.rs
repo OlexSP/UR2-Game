@@ -20,7 +20,7 @@ impl Default for GameState {
 }
 
 const PLAYER_SPEED: f32 = 250.0;
-const ROAD_SPEED: f32 = 400.0;
+const ROAD_SPEED: f32 = 500.0;
 
 fn main() {
     let mut game = Game::new();
@@ -47,6 +47,8 @@ fn main() {
         SpritePreset::RacingBarrelBlue,
         SpritePreset::RacingBarrelRed,
         SpritePreset::RacingConeStraight,
+        SpritePreset::RollingBallBlue,
+        SpritePreset::RollingBallRed
     ];
 
     for (i, preset) in obstacle_presets.into_iter().enumerate() {
@@ -58,9 +60,9 @@ fn main() {
     }
 
     // text plates
-    let health = game.add_text("health", format!("Health: {}", game_state.health_amount));
-    health.translation = Vec2::new(520.0, 320.0);
-    health.layer = 20.0;
+    let health_message = game.add_text("health_message", format!("Health: {}", game_state.health_amount));
+    health_message.translation = Vec2::new(550.0, 320.0);
+    health_message.layer = 20.0;
 
 
     game.add_logic(game_logic);
@@ -84,12 +86,6 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
         game_state.health_amount = 0;
     }
 
-    // health text plate
-    let health = engine.texts.get_mut("health").unwrap();
-    health.value = format!("Health: {}", game_state.health_amount);
-    health.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
-    health.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
-
     // move road objects
     for sprite in engine.sprites.values_mut() {
         if sprite.label.starts_with("roadline") {
@@ -105,5 +101,24 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
                 sprite.translation.y = rng().random_range(-300.0..300.0);
             }
         }
+    }
+
+    // health text plate
+    let health = engine.texts.get_mut("health_message").unwrap();
+    health.value = format!("Health: {}", game_state.health_amount);
+    health.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
+    health.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
+
+    for event in engine.collision_events.drain(..) {
+        if !event.pair.either_contains("player1") || event.state.is_end() { continue; }
+        if game_state.health_amount > 0 {
+            game_state.health_amount -= 1;
+        }
+        engine.audio_manager.play_sfx(SfxPreset::Impact3, 0.5);
+        event.pair.into_iter().filter(|label| label != "player1").for_each(|label|{
+            let obstacle = engine.sprites.get_mut(&label).unwrap();
+            obstacle.translation.x = rng().random_range(800.0..1600.0);
+            obstacle.translation.y = rng().random_range(-300.0..300.0);
+        });
     }
 }
