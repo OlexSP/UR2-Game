@@ -46,9 +46,13 @@ fn main() {
     let obstacle_presets = vec![
         SpritePreset::RacingBarrelBlue,
         SpritePreset::RacingBarrelRed,
+        SpritePreset::RacingBarrelRed,
         SpritePreset::RacingConeStraight,
-        SpritePreset::RollingBallBlue,
-        SpritePreset::RollingBallRed
+        SpritePreset::RacingConeStraight,
+        SpritePreset::RacingConeStraight,
+        SpritePreset::RollingBlockCorner,
+        SpritePreset::RollingBlockSquare,
+        SpritePreset::RollingBlockSmall,
     ];
 
     for (i, preset) in obstacle_presets.into_iter().enumerate() {
@@ -70,6 +74,10 @@ fn main() {
 }
 
 fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
+    if game_state.lost {
+        return;
+    }
+
     let mut direction: f32 = 0.0;
     if engine.keyboard_state.pressed_any(&[KeyCode::Up, KeyCode::W]) {
         direction += 1.0;
@@ -104,10 +112,10 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
     }
 
     // health text plate
-    let health = engine.texts.get_mut("health_message").unwrap();
-    health.value = format!("Health: {}", game_state.health_amount);
-    health.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
-    health.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
+    let health_message = engine.texts.get_mut("health_message").unwrap();
+    health_message.value = format!("Health: {}", game_state.health_amount);
+    health_message.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
+    health_message.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
 
     for event in engine.collision_events.drain(..) {
         if !event.pair.either_contains("player1") || event.state.is_end() { continue; }
@@ -120,5 +128,14 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
             obstacle.translation.x = rng().random_range(800.0..1600.0);
             obstacle.translation.y = rng().random_range(-300.0..300.0);
         });
+    }
+
+    if game_state.health_amount == 0 {
+        game_state.lost = true;
+        let game_over = engine.add_text("game_over", "Game Over");
+        game_over.font_size = 128.0;
+        game_over.translation.y = 100.0;
+        engine.audio_manager.stop_music();
+        engine.audio_manager.play_sfx(SfxPreset::Jingle3, 0.5);
     }
 }
