@@ -2,6 +2,10 @@
 
 use rusty_engine::prelude::*;
 
+// constants
+const MARBLE_SPEED: f32 = 600.0;
+const PLAYER_SPEED: f32 = 300.0;
+
 const BACKGROUND_LAYER: f32 = 0.0;
 const CHARACTER_LAYER: f32 = 10.0;
 const EFFECTS_LAYER: f32 = 2.0;
@@ -64,5 +68,32 @@ fn main() {
 }
 
 fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
+    let player = engine.sprites.get_mut("player").unwrap();
+    if let Some(mouse_location) = engine.mouse_state.location() {
+        player.translation.x = mouse_location.x;
+    }
+    let player_x = player.translation.x;
 
+    // fire a marble
+    if engine.mouse_state.just_pressed(MouseButton::Left) {
+        if let Some(label) = game_state.marble_labels.pop() {
+            let marble_sprite = engine.
+                add_sprite(&label, SpritePreset::RollingBallBlue );
+            marble_sprite.translation = Vec2::new(player_x, -275.0);
+            marble_sprite.layer = UI_TOP_LAYER;
+            marble_sprite.collision = true;
+            engine.audio_manager.play_sfx(SfxPreset::Impact2, 0.4);
+        }
+    }
+
+    // marble movement
+    for sprite in engine.sprites.values_mut() {
+        if sprite.label.starts_with("marble") {
+            sprite.translation.y += MARBLE_SPEED * engine.delta_f32;
+            // let
+            // if sprite.translation.y > 800.0 {
+            //
+            // }
+        }
+    }
 }
