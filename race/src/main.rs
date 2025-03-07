@@ -111,12 +111,6 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
         }
     }
 
-    // health text plate
-    let health_message = engine.texts.get_mut("health_message").unwrap();
-    health_message.value = format!("Health: {}", game_state.health_amount);
-    health_message.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
-    health_message.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
-
     for event in engine.collision_events.drain(..) {
         if !event.pair.either_contains("player1") || event.state.is_end() { continue; }
         if game_state.health_amount > 0 {
@@ -129,6 +123,12 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
             obstacle.translation.y = rng().random_range(-300.0..300.0);
         });
     }
+
+    // health text plate
+    let health_message = engine.texts.get_mut("health_message").unwrap();
+    health_message.value = format!("Health: {}", game_state.health_amount);
+    health_message.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
+    health_message.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
 
     if game_state.health_amount == 0 {
         game_state.lost = true;
