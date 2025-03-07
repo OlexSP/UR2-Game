@@ -1,23 +1,28 @@
 #![allow(dead_code, unused_variables)]
+
 use rusty_engine::prelude::*;
 
 const BACKGROUND_LAYER: f32 = 0.0;
-const CHARACTER_LAYER: f32 = 1.0;
+const CHARACTER_LAYER: f32 = 10.0;
 const EFFECTS_LAYER: f32 = 2.0;
 const UI_BOTTOM_LAYER: f32 = 3.0;
 const UI_TOP_LAYER: f32 = 4.0;
 
 #[derive(Resource)]
 struct GameState {
-    health: f32,
-    timer: Timer
+    marble_labels: Vec<String>,
+    cars_left: u32,
+    score: u32,
+    spawn_timer: Timer
 }
 
 impl Default for GameState {
     fn default() -> Self {
         Self {
-            health: 100.0,
-            timer: Timer::from_seconds(1.0, TimerMode::Repeating)
+            marble_labels: vec!["marble1".into(), "marble2".into(), "marble3".into()],
+            cars_left: 25,
+            score: 0,
+            spawn_timer: Timer::from_seconds(0.0, TimerMode::Once)
         }
     }
 }
@@ -36,10 +41,20 @@ fn main() {
     // set ambient audio
     shoot_game.audio_manager.play_music(MusicPreset::WhimsicalPopsicle, 0.12);
 
-    // add player sprite
-    let player = shoot_game.add_sprite("player", SpritePreset::RacingCarBlue);
-    player.translation = Vec2::new(0.0, 0.0);
-    player.rotation = SOUTH_WEST;
+    // set text
+    let score = shoot_game.
+        add_text("score", format!("Score: {}", game_states.score));
+    score.translation = Vec2::new(520.0, 320.0);
+    let cars_left = shoot_game.
+        add_text("cars_left", format!("Cars left: {}", game_states.cars_left));
+    cars_left.translation = Vec2::new(-520.0, 320.0);
+
+    // set player sprite
+    let player = shoot_game.add_sprite("player", SpritePreset::RacingBarrierRed);
+    player.translation = Vec2::new(0.0, -355.0);
+    player.rotation = NORTH;
+    player.scale = 0.5;
+    player.layer = CHARACTER_LAYER;
 
 
     // game run
