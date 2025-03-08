@@ -87,13 +87,21 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
     }
 
     // marble movement
+    let mut labels_to_delete = vec![];
     for sprite in engine.sprites.values_mut() {
         if sprite.label.starts_with("marble") {
             sprite.translation.y += MARBLE_SPEED * engine.delta_f32;
-            // let
-            // if sprite.translation.y > 800.0 {
-            //
-            // }
+        }
+        if sprite.translation.y > 400.0 || sprite.translation.x > 750.0 {
+            labels_to_delete.push(sprite.label.clone())
+        }
+    }
+
+    // remove  sprites
+    for label in labels_to_delete{
+        engine.sprites.remove(&label);
+        if label.starts_with("marble") {
+            game_state.marble_labels.push(label)
         }
     }
 }
