@@ -1,10 +1,12 @@
 #![allow(dead_code, unused_variables)]
 
+use rand::prelude::*;
 use rusty_engine::prelude::*;
 
 // constants
 const MARBLE_SPEED: f32 = 600.0;
 const PLAYER_SPEED: f32 = 300.0;
+const CAR_SPEED: f32 = 250.0;
 
 const BACKGROUND_LAYER: f32 = 0.0;
 const CHARACTER_LAYER: f32 = 10.0;
@@ -26,7 +28,7 @@ impl Default for GameState {
             marble_labels: vec!["marble1".into(), "marble2".into(), "marble3".into()],
             cars_left: 25,
             score: 0,
-            spawn_timer: Timer::from_seconds(0.0, TimerMode::Once)
+            spawn_timer: Timer::from_seconds(rand::rng().random_range(0.1..1.25), TimerMode::Once)
         }
     }
 }
@@ -61,6 +63,7 @@ fn main() {
     player.layer = CHARACTER_LAYER;
 
 
+
     // game run
     shoot_game.add_logic(game_logic);
     shoot_game.run(game_states);
@@ -68,6 +71,32 @@ fn main() {
 }
 
 fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
+
+    // car sprites
+    if game_state.spawn_timer.tick(engine.delta).just_finished(){
+        game_state.spawn_timer = Timer::from_seconds(rand::rng().random_range(0.1..1.25), TimerMode::Once);
+        if game_state.cars_left > 0 {
+            game_state.cars_left -= 1;
+            let cars_left = engine.texts.get_mut("cars_left").unwrap();
+            cars_left.value = format!("Cars left: {}", game_state.cars_left);
+            let label = format!("car{}", game_state.cars_left);
+
+            let car_choices = vec![
+                SpritePreset::RacingCarBlack,
+                SpritePreset::RacingCarBlue,
+                SpritePreset::RacingCarGreen,
+                SpritePreset::RacingCarRed,
+                SpritePreset::RacingCarYellow
+            ];
+            let car_preset = car_choices.iter().choose(&mut rand::rng()).unwrap().clone();
+            let car = engine.add_sprite(label, car_preset);
+            car.translation.x = -740.0;
+            car.translation.y = rand::rng().random_range(-100.0..325.0);
+            car.collision = true;
+        }
+    }
+
+    // player movement
     let player = engine.sprites.get_mut("player").unwrap();
     if let Some(mouse_location) = engine.mouse_state.location() {
         player.translation.x = mouse_location.x;
@@ -86,12 +115,16 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
         }
     }
 
-    // marble movement
+    // sprites movement
     let mut labels_to_delete = vec![];
     for sprite in engine.sprites.values_mut() {
         if sprite.label.starts_with("marble") {
             sprite.translation.y += MARBLE_SPEED * engine.delta_f32;
         }
+        if sprite.label.starts_with("car") {
+            sprite.translation.x += CAR_SPEED * engine.delta_f32;
+        }
+
         if sprite.translation.y > 400.0 || sprite.translation.x > 750.0 {
             labels_to_delete.push(sprite.label.clone())
         }
