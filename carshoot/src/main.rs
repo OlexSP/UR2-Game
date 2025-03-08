@@ -130,11 +130,27 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
         }
     }
 
-    // remove  sprites
+    // remove sprites
     for label in labels_to_delete{
         engine.sprites.remove(&label);
         if label.starts_with("marble") {
-            game_state.marble_labels.push(label)
+            game_state.marble_labels.push(label.clone());
         }
     }
+
+    // collision
+    for event in engine.collision_events.drain(..) {
+        if !event.pair.either_contains("marble") || event.state.is_end() { continue; }
+        engine.audio_manager.play_sfx(SfxPreset::Confirmation1, 0.5);
+        game_state.score += 1;
+        let score = engine.texts.get_mut("score").unwrap();
+        score.value = format!("Score: {}", game_state.score);
+        for label in event.pair {
+            engine.sprites.remove(&label);
+            if label.contains("marble") {
+                game_state.marble_labels.push(label.clone());
+            }
+        }
+    }
+
 }
