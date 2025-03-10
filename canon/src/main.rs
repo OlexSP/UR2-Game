@@ -7,21 +7,19 @@ struct GameState {
     magnitude: f32,
     rotation: f32,
     ball_velocity: Vec2,
-    canon_ball_is: bool,
 }
 
 impl Default for GameState {
     fn default() -> Self {
         Self {
-            magnitude: 10.0,
+            magnitude: 300.0,
             rotation: 1.25,
-            ball_velocity: Vec2::new(30.0, 30.0),
-            canon_ball_is: false,
+            ball_velocity: Vec2::new(0.0, 0.0),
         }
     }
 }
-const GRAVITY_ACCELERATION: f32 = -9.81;
-const ROTATION_SPEED: f32 = 0.4;
+const GRAVITY_ACCELERATION: f32 = 100.0;
+const ROTATION_SPEED: f32 = 0.5;
 const BALL_LAYER: f32 = 1.0;
 const CANON_LAYER: f32 = 2.0;
 const TEXT_LAYER: f32 = 3.0;
@@ -90,22 +88,27 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
 
 
     if  let Some(canon_ball) = engine.sprites.get_mut("ball") {
-        let initial_cannonball_velocity = Vec2::new(
-            game_state.magnitude * canon_ball.rotation.cos() * game_state.ball_velocity.x,
-            game_state.magnitude * canon_ball.rotation.sin() * game_state.ball_velocity.y,
-        );
+        canon_ball.translation.x += game_state.ball_velocity.x * engine.delta_f32 ;
+        canon_ball.translation.y += game_state.ball_velocity.y * engine.delta_f32 ;
+        game_state.ball_velocity.y -= GRAVITY_ACCELERATION * engine.delta_f32;
 
-        canon_ball.translation.x += initial_cannonball_velocity.x * engine.delta_f32 ;
-        canon_ball.translation.y += initial_cannonball_velocity.y * engine.delta_f32 ;
-
-        if canon_ball.translation.x > 750.0 || canon_ball.translation.y > 400.0 {
+        if canon_ball.translation.x > 750.0 ||
+            canon_ball.translation.y > 400.0 ||
+            canon_ball.translation.y < - 400.0 {
             engine.sprites.remove("ball");
         }
-    } else if engine.keyboard_state.just_pressed(KeyCode::Space) || engine.mouse_state.just_pressed(MouseButton::Left) {
+    } else if engine.keyboard_state.just_pressed(KeyCode::Space) ||
+        engine.mouse_state.just_pressed(MouseButton::Left) {
         let cannon_ball = engine.add_sprite("ball", SpritePreset::RollingBallRed);
         cannon_ball.translation = c_translation;
         cannon_ball.rotation = c_rotation;
         cannon_ball.layer = BALL_LAYER;
+
+        game_state.ball_velocity = Vec2::new(
+            game_state.magnitude * c_rotation.cos(),
+            game_state.magnitude * c_rotation.sin(),
+        );
+
         engine.audio_manager.play_sfx(SfxPreset::Click, 0.2);
     }
 
