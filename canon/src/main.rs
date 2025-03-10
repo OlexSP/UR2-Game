@@ -12,13 +12,16 @@ struct GameState {
 impl Default for GameState {
     fn default() -> Self {
         Self {
-            magnitude: 300.0,
+            magnitude: 15.0,
             rotation: 1.25,
             ball_velocity: Vec2::new(0.0, 0.0),
         }
     }
 }
 const GRAVITY_ACCELERATION: f32 = 100.0;
+const AIR_RESISTANCE: f32 = 15.0;
+const MAGNITUDE_MULTIPLIER: f32 = 20.0;
+const MAGNITUDE_CHANGING_SPEED: f32 = 2.0;
 const ROTATION_SPEED: f32 = 0.5;
 const BALL_LAYER: f32 = 1.0;
 const CANON_LAYER: f32 = 2.0;
@@ -73,6 +76,7 @@ fn main() {
 
 fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
 
+    // keyboard input
     if engine.keyboard_state.pressed_any(&[KeyCode::Up, KeyCode::W]) {
         game_state.rotation += ROTATION_SPEED * engine.delta_f32;
     }
@@ -81,16 +85,36 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
     }
     game_state.rotation = game_state.rotation.clamp(RIGHT, UP);
 
+    if engine.keyboard_state.pressed_any(&[KeyCode::Left, KeyCode::A]) {
+        game_state.magnitude -= MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
+    }
+    if engine.keyboard_state.pressed_any(&[KeyCode::Right, KeyCode::D]) {
+        game_state.magnitude += MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
+    }
+    game_state.magnitude = game_state.magnitude.clamp(0.0, 20.0);
+
+    // text messages
+    let magnitude_message = engine.texts.get_mut("magnitude").unwrap();
+    magnitude_message.value = format!("Magnitude: {:.1}", game_state.magnitude);
+
+
+
+    // cannon rotation movement
     let cannon = engine.sprites.get_mut("cannon").unwrap();
     cannon.rotation = game_state.rotation;
     let c_translation = cannon.translation;
     let c_rotation = cannon.rotation;
 
 
+   // canon bal movement
     if  let Some(canon_ball) = engine.sprites.get_mut("ball") {
         canon_ball.translation.x += game_state.ball_velocity.x * engine.delta_f32 ;
         canon_ball.translation.y += game_state.ball_velocity.y * engine.delta_f32 ;
+
         game_state.ball_velocity.y -= GRAVITY_ACCELERATION * engine.delta_f32;
+
+        game_state.ball_velocity.x -= AIR_RESISTANCE * engine.delta_f32;
+        game_state.ball_velocity.x = game_state.ball_velocity.x.clamp(0.0, 1000.0);
 
         if canon_ball.translation.x > 750.0 ||
             canon_ball.translation.y > 400.0 ||
@@ -105,8 +129,8 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
         cannon_ball.layer = BALL_LAYER;
 
         game_state.ball_velocity = Vec2::new(
-            game_state.magnitude * c_rotation.cos(),
-            game_state.magnitude * c_rotation.sin(),
+            game_state.magnitude * MAGNITUDE_MULTIPLIER * c_rotation.cos(),
+            game_state.magnitude * MAGNITUDE_MULTIPLIER * c_rotation.sin(),
         );
 
         engine.audio_manager.play_sfx(SfxPreset::Click, 0.2);
