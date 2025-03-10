@@ -1,4 +1,3 @@
-#![allow(dead_code, unused_variables)]
 
 use rusty_engine::prelude::*;
 use rand::prelude::*;
@@ -111,10 +110,15 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
         }
     }
 
+    let health_message = engine.texts.get_mut("health_message").unwrap();
+    health_message.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
+    health_message.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
+
     for event in engine.collision_events.drain(..) {
         if !event.pair.either_contains("player1") || event.state.is_end() { continue; }
         if game_state.health_amount > 0 {
             game_state.health_amount -= 1;
+            health_message.value = format!("Health: {}", game_state.health_amount);
         }
         engine.audio_manager.play_sfx(SfxPreset::Impact3, 0.5);
         event.pair.into_iter().filter(|label| label != "player1").for_each(|label|{
@@ -124,12 +128,8 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
         });
     }
 
-    // health text plate
-    let health_message = engine.texts.get_mut("health_message").unwrap();
-    health_message.value = format!("Health: {}", game_state.health_amount);
-    health_message.translation.x = engine.window_dimensions.x / 2.0 - 80.0;
-    health_message.translation.y = engine.window_dimensions.y / 2.0 - 30.0;
 
+    // Game Over
     if game_state.health_amount == 0 {
         game_state.lost = true;
         let game_over = engine.add_text("game_over", "Game Over");
