@@ -31,7 +31,6 @@ fn main() {
     let mut game = Game::new();
     let game_state = GameState::default();
 
-
     let cannon = game.add_sprite("cannon", SpritePreset::RacingBarrierRed);
     cannon.translation = Vec2::new(-550.0, -340.0);
     cannon.rotation = game_state.rotation;
@@ -48,7 +47,7 @@ fn main() {
     goal.scale = 1.5;
     goal.layer = CANON_LAYER;
 
-    let  obstacles = vec![
+    let obstacles = vec![
         SpritePreset::RollingBlockSquare,
         SpritePreset::RollingBlockCorner,
         SpritePreset::RollingBlockNarrow,
@@ -56,7 +55,7 @@ fn main() {
 
     for (i, preset) in obstacles.into_iter().enumerate() {
         let obstacle = game.add_sprite(format!("obstacle{}", i), preset);
-        obstacle.translation = Vec2::new(-100.0 + i as f32 * 100.0, -300.0 );
+        obstacle.translation = Vec2::new(-100.0 + i as f32 * 100.0, -300.0);
         obstacle.collision = true;
     }
 
@@ -66,38 +65,46 @@ fn main() {
     magnitude_text.layer = TEXT_LAYER;
 
     // music
-    game.audio_manager.play_music(MusicPreset::WhimsicalPopsicle, 0.2);
+    game.audio_manager
+        .play_music(MusicPreset::WhimsicalPopsicle, 0.2);
 
     game.add_logic(game_logic);
     game.run(game_state);
-
-
 }
 
 fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
-
     // keyboard input
-    if engine.keyboard_state.pressed_any(&[KeyCode::Up, KeyCode::W]) {
+    if engine
+        .keyboard_state
+        .pressed_any(&[KeyCode::Up, KeyCode::W])
+    {
         game_state.rotation += ROTATION_SPEED * engine.delta_f32;
     }
-    if engine.keyboard_state.pressed_any(&[KeyCode::Down, KeyCode::S]) {
+    if engine
+        .keyboard_state
+        .pressed_any(&[KeyCode::Down, KeyCode::S])
+    {
         game_state.rotation -= ROTATION_SPEED * engine.delta_f32;
     }
     game_state.rotation = game_state.rotation.clamp(RIGHT, UP);
 
-    if engine.keyboard_state.pressed_any(&[KeyCode::Left, KeyCode::A]) {
+    if engine
+        .keyboard_state
+        .pressed_any(&[KeyCode::Left, KeyCode::A])
+    {
         game_state.magnitude -= MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
     }
-    if engine.keyboard_state.pressed_any(&[KeyCode::Right, KeyCode::D]) {
+    if engine
+        .keyboard_state
+        .pressed_any(&[KeyCode::Right, KeyCode::D])
+    {
         game_state.magnitude += MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
     }
-    game_state.magnitude = game_state.magnitude.clamp(0.0, 20.0);
+    game_state.magnitude = game_state.magnitude.clamp(0.0, 25.0);
 
     // text messages
     let magnitude_message = engine.texts.get_mut("magnitude").unwrap();
     magnitude_message.value = format!("Magnitude: {:.1}", game_state.magnitude);
-
-
 
     // cannon rotation movement
     let cannon = engine.sprites.get_mut("cannon").unwrap();
@@ -105,24 +112,30 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
     let c_translation = cannon.translation;
     let c_rotation = cannon.rotation;
 
-
-   // canon bal movement
-    if  let Some(canon_ball) = engine.sprites.get_mut("ball") {
-        canon_ball.translation.x += game_state.ball_velocity.x * engine.delta_f32 ;
-        canon_ball.translation.y += game_state.ball_velocity.y * engine.delta_f32 ;
+    // canon bal movement
+    if let Some(canon_ball) = engine.sprites.get_mut("ball") {
+        canon_ball.translation.x += game_state.ball_velocity.x * engine.delta_f32;
+        canon_ball.translation.y += game_state.ball_velocity.y * engine.delta_f32;
 
         game_state.ball_velocity.y -= GRAVITY_ACCELERATION * engine.delta_f32;
+        game_state.ball_velocity.y = match game_state.ball_velocity.y {
+            y if y > 0.0 => game_state.ball_velocity.y - AIR_RESISTANCE * engine.delta_f32,
+            y if y < 0.0 => game_state.ball_velocity.y + AIR_RESISTANCE * engine.delta_f32,
+            _ => game_state.ball_velocity.y,
+        };
 
         game_state.ball_velocity.x -= AIR_RESISTANCE * engine.delta_f32;
         game_state.ball_velocity.x = game_state.ball_velocity.x.clamp(0.0, 1000.0);
 
-        if canon_ball.translation.x > 750.0 ||
-            canon_ball.translation.y > 400.0 ||
-            canon_ball.translation.y < - 400.0 {
+        if canon_ball.translation.x > 750.0
+            || canon_ball.translation.y > 400.0
+            || canon_ball.translation.y < -400.0
+        {
             engine.sprites.remove("ball");
         }
-    } else if engine.keyboard_state.just_pressed(KeyCode::Space) ||
-        engine.mouse_state.just_pressed(MouseButton::Left) {
+    } else if engine.keyboard_state.just_pressed(KeyCode::Space)
+        || engine.mouse_state.just_pressed(MouseButton::Left)
+    {
         let cannon_ball = engine.add_sprite("ball", SpritePreset::RollingBallRed);
         cannon_ball.translation = c_translation;
         cannon_ball.rotation = c_rotation;
@@ -135,8 +148,4 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
 
         engine.audio_manager.play_sfx(SfxPreset::Click, 0.2);
     }
-
-
-
-
 }
