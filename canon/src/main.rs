@@ -168,17 +168,10 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
                 if label.starts_with("obstacle") {
                     engine.sprites.remove("ball");
                     engine.audio_manager.play_sfx(SfxPreset::Impact2, 0.5);
-                } else if label.starts_with("goal"){
+                }
+                if label.starts_with("goal"){
                     engine.audio_manager.play_sfx(SfxPreset::Impact2, 0.5);
-                    // new goal translation
-                    let goal = engine.sprites.get_mut("goal").unwrap();
-                    goal.translation = Vec2::new(
-                        rng().random_range(250.0..600.0),
-                        rng().random_range(-330.0..300.0)
-                    );
-                    goal.scale = 1.5;
-                    goal.layer = CANON_LAYER;
-                    // new obstacle translations
+                    // new goal and obstacles translations
                     for sprite in engine.sprites.values_mut() {
                         if sprite.label.starts_with("obstacle"){
                             sprite.translation = Vec2::new(
@@ -186,6 +179,11 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
                                 rng().random_range(-320.0..320.0)
                             );
                             sprite.rotation = rng().random_range(0.0..2.0 * PI as f32);
+                        } else if sprite.label.starts_with("goal"){
+                            sprite.translation = Vec2::new(
+                                rng().random_range(250.0..600.0),
+                                rng().random_range(-330.0..300.0)
+                            );
                         }
                     }
                 }
