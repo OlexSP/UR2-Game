@@ -1,95 +1,11 @@
-#![allow(dead_code, unused_variables)]
-
 use rand::prelude::*;
-use rand::rng;
 use rusty_engine::prelude::*;
 use std::f64::consts::PI;
+use rand::rng;
+use crate::constants::*;
+use crate::game_state::GameState;
 
-#[derive(Resource)]
-struct GameState {
-    magnitude: f32,
-    rotation: f32,
-    ball_velocity: Vec2,
-    score: u32,
-}
-
-impl Default for GameState {
-    fn default() -> Self {
-        Self {
-            magnitude: 15.0,
-            rotation: 1.25,
-            ball_velocity: Vec2::new(0.0, 0.0),
-            score: 0,
-        }
-    }
-}
-const GRAVITY_ACCELERATION: f32 = 100.0;
-const AIR_RESISTANCE: f32 = 25.0;
-const MAGNITUDE_MULTIPLIER: f32 = 20.0;
-const MAGNITUDE_CHANGING_SPEED: f32 = 2.0;
-const ROTATION_SPEED: f32 = 0.5;
-const BALL_LAYER: f32 = 1.0;
-const CANON_LAYER: f32 = 2.0;
-const TEXT_LAYER: f32 = 3.0;
-
-fn main() {
-    let mut game = Game::new();
-    let game_state = GameState::default();
-
-    let cannon = game.add_sprite("cannon", SpritePreset::RacingBarrierRed);
-    cannon.translation = Vec2::new(-550.0, -340.0);
-    cannon.rotation = game_state.rotation;
-    cannon.scale = 0.6;
-    cannon.layer = CANON_LAYER;
-
-    let cannon_wheel = game.add_sprite("wheel", SpritePreset::RollingBallBlue);
-    cannon_wheel.translation = Vec2::new(-550.0, -345.0);
-    cannon_wheel.scale = 1.0;
-    cannon_wheel.layer = CANON_LAYER + 1.0;
-
-    let goal = game.add_sprite("goal", SpritePreset::RacingConeStraight);
-    goal.translation = Vec2::new(
-        rng().random_range(250.0..600.0),
-        rng().random_range(-330.0..300.0),
-    );
-    goal.scale = 1.5;
-    goal.layer = CANON_LAYER;
-    goal.collision = true;
-
-    let obstacles = vec![
-        SpritePreset::RollingBlockSquare,
-        SpritePreset::RollingBlockCorner,
-        SpritePreset::RollingBlockNarrow,
-    ];
-
-    for (i, preset) in obstacles.into_iter().enumerate() {
-        let obstacle = game.add_sprite(format!("obstacle{}", i), preset);
-        obstacle.translation = Vec2::new(
-            rng().random_range(-250.0..250.0),
-            rng().random_range(-320.0..320.0),
-        );
-        obstacle.rotation = rng().random_range(0.0..2.0 * PI as f32);
-        obstacle.collision = true;
-    }
-
-    // text
-    let magnitude_text = game.add_text("magnitude", format!("Magnitude: {}", game_state.magnitude));
-    magnitude_text.translation = Vec2::new(-530.0, 320.0);
-    magnitude_text.layer = TEXT_LAYER;
-
-    let score_text = game.add_text("score", format!("Score {}", game_state.score));
-    score_text.translation = Vec2::new(560.0, 320.0);
-    score_text.layer = TEXT_LAYER;
-
-    // music
-    game.audio_manager
-        .play_music(MusicPreset::WhimsicalPopsicle, 0.2);
-
-    game.add_logic(game_logic);
-    game.run(game_state);
-}
-
-fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
+pub fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
     // text messages
     let magnitude_message = engine.texts.get_mut("magnitude").unwrap();
 
@@ -130,7 +46,7 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
     let c_translation = cannon.translation;
     let c_rotation = cannon.rotation;
 
-    // canon bal movement
+    // cannon bal movement
     if let Some(canon_ball) = engine.sprites.get_mut("ball") {
         canon_ball.translation.x += game_state.ball_velocity.x * engine.delta_f32;
         canon_ball.translation.y += game_state.ball_velocity.y * engine.delta_f32;
