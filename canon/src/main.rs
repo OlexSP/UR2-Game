@@ -1,15 +1,16 @@
 #![allow(dead_code, unused_variables)]
 
-use std::f64::consts::PI;
-use rusty_engine::prelude::*;
 use rand::prelude::*;
 use rand::rng;
+use rusty_engine::prelude::*;
+use std::f64::consts::PI;
 
 #[derive(Resource)]
 struct GameState {
     magnitude: f32,
     rotation: f32,
     ball_velocity: Vec2,
+    score: u32,
 }
 
 impl Default for GameState {
@@ -18,11 +19,12 @@ impl Default for GameState {
             magnitude: 15.0,
             rotation: 1.25,
             ball_velocity: Vec2::new(0.0, 0.0),
+            score: 0,
         }
     }
 }
 const GRAVITY_ACCELERATION: f32 = 100.0;
-const AIR_RESISTANCE: f32 = 15.0;
+const AIR_RESISTANCE: f32 = 25.0;
 const MAGNITUDE_MULTIPLIER: f32 = 20.0;
 const MAGNITUDE_CHANGING_SPEED: f32 = 2.0;
 const ROTATION_SPEED: f32 = 0.5;
@@ -48,7 +50,7 @@ fn main() {
     let goal = game.add_sprite("goal", SpritePreset::RacingConeStraight);
     goal.translation = Vec2::new(
         rng().random_range(250.0..600.0),
-        rng().random_range(-330.0..300.0)
+        rng().random_range(-330.0..300.0),
     );
     goal.scale = 1.5;
     goal.layer = CANON_LAYER;
@@ -64,7 +66,7 @@ fn main() {
         let obstacle = game.add_sprite(format!("obstacle{}", i), preset);
         obstacle.translation = Vec2::new(
             rng().random_range(-250.0..250.0),
-            rng().random_range(-320.0..320.0)
+            rng().random_range(-320.0..320.0),
         );
         obstacle.rotation = rng().random_range(0.0..2.0 * PI as f32);
         obstacle.collision = true;
@@ -72,8 +74,12 @@ fn main() {
 
     // text
     let magnitude_text = game.add_text("magnitude", format!("Magnitude: {}", game_state.magnitude));
-    magnitude_text.translation = Vec2::new(-540.0, 320.0);
+    magnitude_text.translation = Vec2::new(-530.0, 320.0);
     magnitude_text.layer = TEXT_LAYER;
+
+    let score_text = game.add_text("score", format!("Score {}", game_state.score));
+    score_text.translation = Vec2::new(560.0, 320.0);
+    score_text.layer = TEXT_LAYER;
 
     // music
     game.audio_manager
@@ -84,6 +90,9 @@ fn main() {
 }
 
 fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
+    // text messages
+    let magnitude_message = engine.texts.get_mut("magnitude").unwrap();
+
     // keyboard input
     if engine
         .keyboard_state
@@ -104,18 +113,16 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
         .pressed_any(&[KeyCode::Left, KeyCode::A])
     {
         game_state.magnitude -= MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
+        magnitude_message.value = format!("Magnitude: {:.1}", game_state.magnitude);
     }
     if engine
         .keyboard_state
         .pressed_any(&[KeyCode::Right, KeyCode::D])
     {
         game_state.magnitude += MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
+        magnitude_message.value = format!("Magnitude: {:.1}", game_state.magnitude);
     }
     game_state.magnitude = game_state.magnitude.clamp(0.0, 25.0);
-
-    // text messages
-    let magnitude_message = engine.texts.get_mut("magnitude").unwrap();
-    magnitude_message.value = format!("Magnitude: {:.1}", game_state.magnitude);
 
     // cannon rotation movement
     let cannon = engine.sprites.get_mut("cannon").unwrap();
@@ -145,51 +152,58 @@ fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
             engine.sprites.remove("ball");
         }
     } else if engine.keyboard_state.just_pressed(KeyCode::Space)
-        || engine.mouse_state.just_pressed(MouseButton::Left) {
-            let cannon_ball = engine.add_sprite("ball", SpritePreset::RollingBallRed);
-            cannon_ball.translation = c_translation;
-            cannon_ball.rotation = c_rotation;
-            cannon_ball.layer = BALL_LAYER;
-            cannon_ball.collision = true;
+        || engine.mouse_state.just_pressed(MouseButton::Left)
+    {
+        let cannon_ball = engine.add_sprite("ball", SpritePreset::RollingBallRed);
+        cannon_ball.translation = c_translation;
+        cannon_ball.rotation = c_rotation;
+        cannon_ball.layer = BALL_LAYER;
+        cannon_ball.collision = true;
 
-            game_state.ball_velocity = Vec2::new(
-                game_state.magnitude * MAGNITUDE_MULTIPLIER * c_rotation.cos(),
-                game_state.magnitude * MAGNITUDE_MULTIPLIER * c_rotation.sin(),
-            );
+        game_state.ball_velocity = Vec2::new(
+            game_state.magnitude * MAGNITUDE_MULTIPLIER * c_rotation.cos(),
+            game_state.magnitude * MAGNITUDE_MULTIPLIER * c_rotation.sin(),
+        );
 
-            engine.audio_manager.play_sfx(SfxPreset::Click, 0.2);
-        }
+        engine.audio_manager.play_sfx(SfxPreset::Click, 0.2);
+    }
 
     // handle collisions
     for event in engine.collision_events.drain(..) {
-        if !event.pair.either_contains("ball") || event.state.is_end() { continue; }
-            for label in [event.pair.0, event.pair.1] {
-                // remove the ball if it hits an obstacle
-                if label.starts_with("obstacle") {
-                    engine.sprites.remove("ball");
-                    engine.audio_manager.play_sfx(SfxPreset::Impact2, 0.5);
-                }
-                if label.starts_with("goal"){
-                    engine.audio_manager.play_sfx(SfxPreset::Impact2, 0.5);
-                    // new goal and obstacles translations
-                    for sprite in engine.sprites.values_mut() {
-                        if sprite.label.starts_with("obstacle"){
-                            sprite.translation = Vec2::new(
-                                rng().random_range(-250.0..250.0),
-                                rng().random_range(-320.0..320.0)
-                            );
-                            sprite.rotation = rng().random_range(0.0..2.0 * PI as f32);
-                        } else if sprite.label.starts_with("goal"){
-                            sprite.translation = Vec2::new(
-                                rng().random_range(250.0..600.0),
-                                rng().random_range(-330.0..300.0)
-                            );
-                        }
+        if !event.pair.either_contains("ball")
+            || event.pair.either_contains("cannon")
+            || event.state.is_end()
+        {
+            continue;
+        }
+        for label in [event.pair.0, event.pair.1] {
+            // remove the ball if it hits an obstacle
+            if label.starts_with("obstacle") {
+                engine.sprites.remove("ball");
+                engine.audio_manager.play_sfx(SfxPreset::Impact2, 0.5);
+            }
+            if label.starts_with("goal") {
+                game_state.score += 1;
+                let score_text = engine.texts.get_mut("score").unwrap();
+                score_text.value = format!("Score {}", game_state.score);
+                engine.audio_manager.play_sfx(SfxPreset::Impact2, 0.5);
+
+                // new goal and obstacles translations
+                for sprite in engine.sprites.values_mut() {
+                    if sprite.label.starts_with("obstacle") {
+                        sprite.translation = Vec2::new(
+                            rng().random_range(-250.0..250.0),
+                            rng().random_range(-320.0..320.0),
+                        );
+                        sprite.rotation = rng().random_range(0.0..2.0 * PI as f32);
+                    } else if sprite.label.starts_with("goal") {
+                        sprite.translation = Vec2::new(
+                            rng().random_range(250.0..600.0),
+                            rng().random_range(-330.0..300.0),
+                        );
                     }
                 }
-
             }
-
-
+        }
     }
 }
