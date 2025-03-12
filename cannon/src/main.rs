@@ -16,7 +16,7 @@ fn main() {
     setup_cannon(&mut game, game_state.rotation);
     setup_goal(&mut game);
     setup_obstacles(&mut game);
-    setup_text(&mut game, game_state.magnitude, game_state.score);
+    setup_text(&mut game, game_state.magnitude.0, game_state.score);
 
     game.audio_manager
         .play_music(MusicPreset::WhimsicalPopsicle, 0.2);
@@ -24,3 +24,4 @@ fn main() {
     game.add_logic(game_logic);
     game.run(game_state);
 }
+

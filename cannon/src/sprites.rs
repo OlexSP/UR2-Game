@@ -41,7 +41,7 @@ pub fn setup_obstacles(game: &mut Game<GameState>) {
             rng().random_range(-250.0..250.0),
             rng().random_range(-320.0..320.0),
         );
-        obstacle.rotation = rng().random_range(0.0..2.0 * std::f64::consts::PI as f32);
+        obstacle.rotation = rng().random_range(RIGHT..LEFT);
         obstacle.collision = true;
     }
 }
