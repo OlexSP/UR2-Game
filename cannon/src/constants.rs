@@ -6,3 +6,10 @@ pub const ROTATION_SPEED: f32 = 0.5;
 pub const BALL_LAYER: f32 = 1.0;
 pub const CANON_LAYER: f32 = 2.0;
 pub const TEXT_LAYER: f32 = 3.0;
+
+// New constants
+pub const BALL_X_MAX: f32 = 750.0;
+pub const BALL_Y_MAX: f32 = 1000.0;
+pub const BALL_Y_MIN: f32 = -400.0;
+pub const BALL_VELOCITY_X_MIN: f32 = 0.0;
+pub const BALL_VELOCITY_X_MAX: f32 = 1000.0;
