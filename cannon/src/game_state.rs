@@ -6,6 +6,7 @@ pub  struct GameState {
     pub rotation: f32,
     pub ball_velocity: Vec2,
     pub score: u32,
+    pub prev_mouse_x: f32,
 }
 
 impl Default for GameState {
@@ -15,6 +16,7 @@ impl Default for GameState {
             rotation: 1.25,
             ball_velocity: Vec2::new(0.0, 0.0),
             score: 0,
+            prev_mouse_x: 0.0,
         }
     }
 }

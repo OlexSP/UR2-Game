@@ -19,6 +19,7 @@ pub fn update_projectile(engine: &mut Engine, game_state: &mut GameState) {
             engine.sprites.remove("ball");
         }
     } else if engine.keyboard_state.just_pressed(KeyCode::Space)
+        || engine.mouse_state.just_pressed(MouseButton::Middle)
     {
         spawn_ball(engine, game_state, c_translation, c_rotation);
     }

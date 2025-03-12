@@ -3,7 +3,7 @@ pub const AIR_RESISTANCE: f32 = 25.0;
 
 // speed
 pub const MAGNITUDE_MULTIPLIER: f32 = 20.0;
-pub const MAGNITUDE_CHANGING_SPEED: f32 = 10.0;
+pub const MAGNITUDE_CHANGING_SPEED: f32 = 5.0;
 pub const ROTATION_SPEED: f32 = 0.5;
 
 // layers
