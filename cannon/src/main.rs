@@ -2,11 +2,11 @@ use rusty_engine::prelude::*;
 
 mod constants;
 mod game_state;
-mod logic;
 mod sprites;
+mod logic;
 
 use game_state::GameState;
-use logic::game_logic;
+use logic::logic::game_logic;
 use sprites::{setup_cannon, setup_goal, setup_obstacles, setup_text};
 
 fn main() {
