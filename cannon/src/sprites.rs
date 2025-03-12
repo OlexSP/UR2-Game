@@ -4,7 +4,14 @@ use rusty_engine::prelude::*;
 use crate::constants::*;
 use crate::game_state::GameState;
 
-pub fn setup_cannon(game: &mut Game<GameState>, rotation: f32) {
+pub fn setup_sprites (game: &mut Game<GameState>, game_state: &GameState) {
+    setup_cannon(game, game_state.rotation);
+    setup_goal( game);
+    setup_obstacles(game);
+    setup_text(game, game_state.magnitude.0, game_state.score);
+    setup_slider(game, game_state.magnitude.0);
+}
+fn setup_cannon(game: &mut Game<GameState>, rotation: f32) {
     let cannon = game.add_sprite("cannon", SpritePreset::RacingBarrierRed);
     cannon.translation = Vec2::new(-550.0, -340.0);
     cannon.rotation = rotation;
@@ -17,7 +24,7 @@ pub fn setup_cannon(game: &mut Game<GameState>, rotation: f32) {
     cannon_wheel.layer = CANON_LAYER + 1.0;
 }
 
-pub fn setup_goal(game: &mut Game<GameState>) {
+fn setup_goal(game: &mut Game<GameState>) {
     let goal = game.add_sprite("goal", SpritePreset::RacingConeStraight);
     goal.translation = Vec2::new(
         rng().random_range(250.0..600.0),
@@ -28,7 +35,7 @@ pub fn setup_goal(game: &mut Game<GameState>) {
     goal.collision = true;
 }
 
-pub fn setup_obstacles(game: &mut Game<GameState>) {
+fn setup_obstacles(game: &mut Game<GameState>) {
     let obstacles = vec![
         SpritePreset::RollingBlockSquare,
         SpritePreset::RollingBlockCorner,
@@ -46,12 +53,27 @@ pub fn setup_obstacles(game: &mut Game<GameState>) {
     }
 }
 
-pub fn setup_text(game: &mut Game<GameState>, magnitude: f32, score: u32) {
-    let magnitude_text = game.add_text("magnitude", format!("Magnitude: {}", magnitude));
+fn setup_text(game: &mut Game<GameState>, magnitude: f32, score: u32) {
+    let magnitude_text = game.add_text("magnitude", format!("Magnitude: {:.1}", magnitude));
     magnitude_text.translation = Vec2::new(-530.0, 320.0);
     magnitude_text.layer = TEXT_LAYER;
 
     let score_text = game.add_text("score", format!("Score {}", score));
     score_text.translation = Vec2::new(560.0, 320.0);
     score_text.layer = TEXT_LAYER;
+}
+
+fn setup_slider(game: &mut Game<GameState>, magnitude: f32) {
+    let slider = game
+        .add_sprite("magnitude_slider", SpritePreset::RacingBarrierRed);
+    slider.translation = Vec2::new(-605.0 + magnitude * 6.0, 250.0);
+    slider.scale = 0.15;
+    slider.layer = TEXT_LAYER;
+    slider.rotation = UP;
+    let slider_bar = game
+
+        .add_sprite("bar", SpritePreset::RollingBlockNarrow);
+    slider_bar.translation = Vec2::new(-530.0, 250.0);
+    slider_bar.layer = TEXT_LAYER - 1.0;
+    slider_bar.scale = 1.5;
 }

@@ -17,6 +17,9 @@ fn update_text_messages(engine: &mut Engine, game_state: &mut GameState) {
         let magnitude_message = engine.texts.get_mut("magnitude").unwrap();
         magnitude_message.value = format!("Magnitude: {:.1}", game_state.magnitude.0);
         game_state.magnitude.1 = false;
+
+        let slider = engine.sprites.get_mut("magnitude_slider").unwrap();
+        slider.translation.x = -605.0 + game_state.magnitude.0 * 6.0;
     }
 }
 

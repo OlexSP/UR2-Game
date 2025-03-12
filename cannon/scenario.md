@@ -50,14 +50,14 @@ let initial_cannonball_velocity = Vec2::new(
 ```
 
 1. Move the cannon ball sprite by the amount stored in the game state's velocity field multiplied by `engine.delta_f32` each frame. At this point, you should be able to run the game, rotate the cannon, fire the cannon, and see the cannon move across the screen in a straight line.
-1. Implement the gravity logic. Each frame, subtract (_gravity constant_ * `engine.delta_f32`) from the "Y" value of the cannon ball's velocity.
-1. Decide which keyboard/mouse input will change the firing magnitude of the cannon, and implement it.
+2. Implement the gravity logic. Each frame, subtract (_gravity constant_ * `engine.delta_f32`) from the "Y" value of the cannon ball's velocity.
+3. Decide which keyboard/mouse input will change the firing magnitude of the cannon, and implement it.
    - Constrain the firing magnitude between `0.0` and some semi-reasonable value.
    - Every time the firing magnitude changes, change the value of the `Text` that is displaying it in the top left corner of the screen. Don't change the value of the `Text` if the firing magnitude didn't change.
-1. Detect collisions between the cannon ball and obstacles. The cannon ball should be destroyed if it hits an obstacle.
+4. Detect collisions between the cannon ball and obstacles. The cannon ball should be destroyed if it hits an obstacle.
    1. For collisions to be detected between two sprites, the `.collision` field of _both_ sprites must be set to true. Set this field on the cannon ball, the obstacles, and the goal.
    1. Play a sound when the cannon ball hits an obstacle
-1. Detect collisions between the cannon ball and the goal. The game is won if the cannon ball hits the goal.
+5. Detect collisions between the cannon ball and the goal. The game is won if the cannon ball hits the goal.
    1. Play a sound when the cannon ball hits the goal.
 
 
