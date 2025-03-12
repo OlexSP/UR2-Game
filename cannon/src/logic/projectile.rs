@@ -41,8 +41,6 @@ fn update_ball_physics(
     };
 
     game_state.ball_velocity.x -= AIR_RESISTANCE * delta;
-    game_state.ball_velocity.x = game_state.ball_velocity.x.clamp(BALL_VELOCITY_X_MIN, BALL_VELOCITY_X_MAX);
-
 }
 
 fn spawn_ball(

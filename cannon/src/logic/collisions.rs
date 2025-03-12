@@ -8,7 +8,7 @@ use rusty_engine::prelude::{Sprite, Text, Vec2};
 use rusty_engine::{LEFT, RIGHT};
 use crate::game_state::GameState;
 
-// handle_collisions() variant w/o memory allocation
+// handle_collisions() 2nd variant w/o memory allocation
 pub fn handle_collisions(engine: &mut Engine, game_state: &mut GameState) {
     // Iterate directly over the drain iterator
     for event in engine.collision_events.drain(..) {
@@ -51,6 +51,7 @@ fn handle_goal_collision(
     game_state.score += 1;
     let score_text = texts.get_mut("score").unwrap();
     score_text.value = format!("Score {}", game_state.score);
+    sprites.remove("ball");
     audio_manager.play_sfx(SfxPreset::Impact2, 0.5);
     reposition_sprites(sprites);
 }
