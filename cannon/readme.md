@@ -4,8 +4,7 @@ This is a simple 2D cannon game built using the Rust programming language and th
 
 ## Scenario
 
-The game was made according to the Ultimate Rust 2 course scenario:
-[https://github.com/CleanCut/rusty_engine/blob/main/scenarios/cannon_practice.md](https://github.com/CleanCut/rusty_engine/blob/main/scenarios/cannon_practice.md)
+The game was made according to the Ultimate Rust 2 course [scenario](https://github.com/CleanCut/rusty_engine/blob/main/scenarios/cannon_practice.md).
 
 
 ## Features
@@ -25,7 +24,7 @@ The game was made according to the Ultimate Rust 2 course scenario:
 
 1.  **Clone the Repository:**
     ```
-    git clone https://github.com/OlexSP/UR2-Game
+    git clone https://github.com/OlexSP/UR2-Game/cannon
     cd cannon
     ```
 
@@ -48,11 +47,16 @@ cannon/
 ├── Cargo.toml
 ├── README.md
 └── src/
-├── main.rs         # Main entry point
-├── game_state.rs   # Game state management
-├── constants.rs    # Game constants
-├── sprites.rs      # Sprite setup
-└── logic.rs        # Game logic
+    ├── main.rs         # Main entry point
+    ├── game_state.rs   # Game state management
+    ├── constants.rs    # Game constants
+    ├── sprites.rs      # Sprite setup
+    └── logic/          # Game logic
+        ├── mod.rs
+        ├── logic.rs
+        ├── input.rs
+        ├── projectile.rs
+        └── collisions.rs    
 ```
 
 
