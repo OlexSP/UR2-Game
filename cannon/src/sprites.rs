@@ -29,7 +29,7 @@ fn setup_goal(game: &mut Game<GameState>) {
     let goal = game.add_sprite("goal", SpritePreset::RacingConeStraight);
     goal.translation = Vec2::new(
         rng().random_range(250.0..600.0),
-        rng().random_range(-330.0..300.0),
+        rng().random_range(-330.0..250.0),
     );
     goal.scale = 1.5;
     goal.layer = CANON_LAYER;
@@ -61,13 +61,13 @@ fn setup_info_messages(game: &mut Game<GameState>, magnitude: f32, score: u32, a
     magnitude_text.layer = TEXT_LAYER;
 
     let score_text = game.add_text("score", format!(
-        "Score {}", score
+        "Score: {}", score
     ));
     score_text.translation = Vec2::new(560.0, 320.0);
     score_text.layer = TEXT_LAYER;
 
     let attempts_text = game.add_text("attempts", format!(
-        "Attempts {}", attempts
+        "Attempts: {}", attempts
     ));
     attempts_text.translation = Vec2::new(0.0, 320.0);
     attempts_text.layer = TEXT_LAYER;

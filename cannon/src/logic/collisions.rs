@@ -17,7 +17,12 @@ pub fn handle_collisions(engine: &mut Engine, game_state: &mut GameState) {
         }
         for label in [event.pair.0, event.pair.1] {
             if label.starts_with("obstacle") {
-                handle_obstacle_collision(&mut engine.sprites, &mut engine.audio_manager);
+                handle_obstacle_collision(
+                    &mut engine.sprites,
+                    &mut engine.audio_manager,
+                    game_state
+                );
+
             }
             if label.starts_with("goal") {
                 handle_goal_collision(
@@ -37,7 +42,14 @@ fn is_relevant_collision(event: &CollisionEvent) -> bool {
         !event.state.is_end()
 }
 
-fn handle_obstacle_collision(sprites: &mut  HashMap<String, Sprite>, audio_manager: &mut AudioManager) {
+fn handle_obstacle_collision(
+    sprites: &mut  HashMap<String, Sprite>,
+    audio_manager: &mut AudioManager,
+    game_state: &mut GameState
+) {
+    game_state.lives -= 1;
+    let label = format!("life{}", game_state.lives);
+    sprites.remove(&label);
     sprites.remove("ball");
     audio_manager.play_sfx(SfxPreset::Impact2, 0.5);
 }
@@ -50,7 +62,7 @@ fn handle_goal_collision(
 ) {
     game_state.score += 1;
     let score_text = texts.get_mut("score").unwrap();
-    score_text.value = format!("Score {}", game_state.score);
+    score_text.value = format!("Score: {}", game_state.score);
     sprites.remove("ball");
     audio_manager.play_sfx(SfxPreset::Impact2, 0.5);
     reposition_sprites(sprites);
@@ -67,7 +79,7 @@ fn reposition_sprites(sprites: &mut HashMap<String, Sprite>) {
         } else if sprite.label.starts_with("goal") {
             sprite.translation = Vec2::new(
                 rng().random_range(250.0..600.0),
-                rng().random_range(-330.0..300.0),
+                rng().random_range(-330.0..250.0),
             );
         }
     }
