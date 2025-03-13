@@ -1,15 +1,16 @@
+use crate::constants::*;
+use crate::game_state::GameState;
 use rand::prelude::*;
 use rand::rng;
 use rusty_engine::prelude::*;
-use crate::constants::*;
-use crate::game_state::GameState;
 
 pub fn setup_sprites (game: &mut Game<GameState>, game_state: &GameState) {
     setup_cannon(game, game_state.rotation);
     setup_goal( game);
     setup_obstacles(game);
-    setup_text(game, game_state.magnitude.0, game_state.score);
+    setup_info_messages(game, game_state.magnitude.0, game_state.score, game_state.attempts);
     setup_slider(game, game_state.magnitude.0);
+    setup_lives(game, game_state.lives)
 }
 fn setup_cannon(game: &mut Game<GameState>, rotation: f32) {
     let cannon = game.add_sprite("cannon", SpritePreset::RacingBarrierRed);
@@ -53,27 +54,47 @@ fn setup_obstacles(game: &mut Game<GameState>) {
     }
 }
 
-fn setup_text(game: &mut Game<GameState>, magnitude: f32, score: u32) {
-    let magnitude_text = game.add_text("magnitude", format!("Magnitude: {:.1}", magnitude));
+fn setup_info_messages(game: &mut Game<GameState>, magnitude: f32, score: u32, attempts: u32) {
+    let magnitude_text = game.
+        add_text("magnitude", format!("Magnitude: {:.1}", magnitude));
     magnitude_text.translation = Vec2::new(-530.0, 320.0);
     magnitude_text.layer = TEXT_LAYER;
 
-    let score_text = game.add_text("score", format!("Score {}", score));
+    let score_text = game.add_text("score", format!(
+        "Score {}", score
+    ));
     score_text.translation = Vec2::new(560.0, 320.0);
     score_text.layer = TEXT_LAYER;
+
+    let attempts_text = game.add_text("attempts", format!(
+        "Attempts {}", attempts
+    ));
+    attempts_text.translation = Vec2::new(0.0, 320.0);
+    attempts_text.layer = TEXT_LAYER;
 }
 
 fn setup_slider(game: &mut Game<GameState>, magnitude: f32) {
     let slider = game
         .add_sprite("magnitude_slider", SpritePreset::RacingBarrierRed);
-    slider.translation = Vec2::new(-605.0 + magnitude * 6.0, 250.0);
+    slider.translation = Vec2::new(-605.0 + magnitude * 6.0, 265.0);
     slider.scale = 0.15;
     slider.layer = TEXT_LAYER;
     slider.rotation = UP;
-    let slider_bar = game
 
+    let slider_bar = game
         .add_sprite("bar", SpritePreset::RollingBlockNarrow);
-    slider_bar.translation = Vec2::new(-530.0, 250.0);
+    slider_bar.translation = Vec2::new(-530.0, 265.0);
     slider_bar.layer = TEXT_LAYER - 1.0;
     slider_bar.scale = 1.5;
+}
+
+fn setup_lives(game: &mut Game<GameState>, lives:u32) {
+    for i in 0..lives {
+        let life_sprite = game
+            .add_sprite(format!("life{}", i), SpritePreset::RacingCarRed);
+        life_sprite.translation = Vec2::new(530.0 + i as f32 * 30.0, 270.0);
+        life_sprite.scale = 0.3;
+        life_sprite.rotation = UP;
+        life_sprite.layer = TEXT_LAYER;
+    }
 }
