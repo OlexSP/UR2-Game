@@ -10,7 +10,7 @@ pub fn setup_sprites (game: &mut Game<GameState>, game_state: &GameState) {
     setup_obstacles(game);
     setup_info_messages(game, game_state.magnitude.0, game_state.score, game_state.attempts);
     setup_slider(game, game_state.magnitude.0);
-    setup_lives(game, game_state.lives)
+    setup_lives(game, &game_state.lives)
 }
 fn setup_cannon(game: &mut Game<GameState>, rotation: f32) {
     let cannon = game.add_sprite("cannon", SpritePreset::RacingBarrierRed);
@@ -29,7 +29,7 @@ fn setup_goal(game: &mut Game<GameState>) {
     let goal = game.add_sprite("goal", SpritePreset::RacingConeStraight);
     goal.translation = Vec2::new(
         rng().random_range(250.0..600.0),
-        rng().random_range(-330.0..300.0),
+        rng().random_range(-330.0..250.0),
     );
     goal.scale = 1.5;
     goal.layer = CANON_LAYER;
@@ -61,13 +61,13 @@ fn setup_info_messages(game: &mut Game<GameState>, magnitude: f32, score: u32, a
     magnitude_text.layer = TEXT_LAYER;
 
     let score_text = game.add_text("score", format!(
-        "Score {}", score
+        "Score: {}", score
     ));
     score_text.translation = Vec2::new(560.0, 320.0);
     score_text.layer = TEXT_LAYER;
 
     let attempts_text = game.add_text("attempts", format!(
-        "Attempts {}", attempts
+        "Attempts: {}", attempts
     ));
     attempts_text.translation = Vec2::new(0.0, 320.0);
     attempts_text.layer = TEXT_LAYER;
@@ -88,8 +88,8 @@ fn setup_slider(game: &mut Game<GameState>, magnitude: f32) {
     slider_bar.scale = 1.5;
 }
 
-fn setup_lives(game: &mut Game<GameState>, lives:u32) {
-    for i in 0..lives {
+pub fn setup_lives(game: &mut Engine, lives: & u32) {
+    for i in 0..*lives {
         let life_sprite = game
             .add_sprite(format!("life{}", i), SpritePreset::RacingCarRed);
         life_sprite.translation = Vec2::new(530.0 + i as f32 * 30.0, 270.0);

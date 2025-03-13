@@ -12,16 +12,17 @@ pub fn update_projectile(engine: &mut Engine, game_state: &mut GameState) {
     if let Some(canon_ball) = engine.sprites.get_mut("ball") {
         update_ball_physics(canon_ball, game_state, engine.delta_f32);
         // Check bounds and remove ball after physics update
-        if canon_ball.translation.x > BALL_X_MAX
-            || canon_ball.translation.y > BALL_Y_MAX
-            || canon_ball.translation.y < BALL_Y_MIN
+        if canon_ball.translation.x > BALL_X_MAX ||
+            canon_ball.translation.y > BALL_Y_MAX ||
+            canon_ball.translation.y < BALL_Y_MIN
         {
             engine.sprites.remove("ball");
         }
-    } else if engine.keyboard_state.just_pressed(KeyCode::Space)
-        || engine.mouse_state.just_pressed(MouseButton::Middle)
+    } else if engine.keyboard_state.just_pressed(KeyCode::Space) ||
+        engine.mouse_state.just_pressed(MouseButton::Left)
     {
         spawn_ball(engine, game_state, c_translation, c_rotation);
+        game_state.attempts -= 1;
     }
 }
 
