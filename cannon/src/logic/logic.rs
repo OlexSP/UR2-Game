@@ -13,18 +13,19 @@ pub fn game_logic(engine: &mut Engine, game_state: &mut GameState) {
         }
         if engine.keyboard_state.just_pressed(KeyCode::Y) {
             reset_game(engine, game_state);
+            update_text_messages(engine,game_state);
 
         } else if engine.keyboard_state.just_pressed(KeyCode::N){
             engine.should_exit = true;
         }
         return;
     }
-    update_text_messages(engine, game_state);
+
     handle_input(engine, game_state);
     update_cannon(engine, game_state);
     update_projectile(engine, game_state);
     handle_collisions(engine, game_state);
-
+    update_text_messages(engine, game_state);
 }
 
 fn reset_game(engine: &mut Engine, game_state: &mut GameState){
@@ -40,14 +41,12 @@ fn reset_game_state(game_state: &mut GameState) {
     *game_state = GameState::default()
 }
 fn update_text_messages(engine: &mut Engine, game_state: &mut GameState) {
-    if game_state.magnitude.1 {
-        let magnitude_message = engine.texts.get_mut("magnitude").unwrap();
-        magnitude_message.value = format!("Magnitude: {:.1}", game_state.magnitude.0);
-        game_state.magnitude.1 = false;
 
-        let slider = engine.sprites.get_mut("magnitude_slider").unwrap();
-        slider.translation.x = -605.0 + game_state.magnitude.0 * 6.0;
-    }
+    let magnitude_message = engine.texts.get_mut("magnitude").unwrap();
+    magnitude_message.value = format!("Magnitude: {:.1}", game_state.magnitude);
+
+    let slider = engine.sprites.get_mut("magnitude_slider").unwrap();
+    slider.translation.x = -605.0 + game_state.magnitude * 6.0;
 
     let attempt_message = engine.texts.get_mut("attempts").unwrap();
     attempt_message.value = format!("Attempts: {}", game_state.attempts);

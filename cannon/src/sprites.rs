@@ -5,11 +5,15 @@ use rand::rng;
 use rusty_engine::prelude::*;
 
 pub fn setup_sprites (game: &mut Game<GameState>, game_state: &GameState) {
+    let wallpaper = game.add_sprite("wallpaper", "wallpapers/cannon_background.png");
+    wallpaper.scale = 1.5 ;
+    wallpaper.layer = WALL_LAYER;
+
     setup_cannon(game, game_state.rotation);
     setup_goal( game);
     setup_obstacles(game);
-    setup_info_messages(game, game_state.magnitude.0, game_state.score, game_state.attempts);
-    setup_slider(game, game_state.magnitude.0);
+    setup_info_messages(game, game_state.magnitude, game_state.score, game_state.attempts);
+    setup_slider(game, game_state.magnitude);
     setup_lives(game, &game_state.lives)
 }
 fn setup_cannon(game: &mut Game<GameState>, rotation: f32) {
@@ -49,6 +53,7 @@ fn setup_obstacles(game: &mut Game<GameState>) {
             rng().random_range(-250.0..250.0),
             rng().random_range(-320.0..320.0),
         );
+        obstacle.layer = BALL_LAYER;
         obstacle.rotation = rng().random_range(RIGHT..LEFT);
         obstacle.collision = true;
     }

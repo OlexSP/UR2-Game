@@ -8,17 +8,13 @@ use crate::game_state::GameState;
 pub fn handle_input(engine: &mut Engine, game_state: &mut GameState) {
     // mouse drag control
     if engine.mouse_state.pressed(MouseButton::Left){
-        game_state.magnitude.0 += engine.mouse_state.motion().x
+        game_state.magnitude += engine.mouse_state.motion().x
             * MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
-        game_state.magnitude.1 = true;
     }
-
     if engine.mouse_state.pressed(MouseButton::Right){
         game_state.rotation += engine.mouse_state.motion().y
             * ROTATION_SPEED * engine.delta_f32;
     }
-
-
     // cannon rotation
     if engine.keyboard_state.pressed_any(&[KeyCode::Up, KeyCode::W]) {
         game_state.rotation += ROTATION_SPEED * engine.delta_f32;
@@ -27,16 +23,12 @@ pub fn handle_input(engine: &mut Engine, game_state: &mut GameState) {
         game_state.rotation -= ROTATION_SPEED * engine.delta_f32;
     }
     game_state.rotation = game_state.rotation.clamp(RIGHT, UP);
-
     // keyboard control
     if engine.keyboard_state.pressed_any(&[KeyCode::Left, KeyCode::A]) {
-        game_state.magnitude.0 -= MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
-        game_state.magnitude.1 = true;
+        game_state.magnitude -= MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
     }
     if engine.keyboard_state.pressed_any(&[KeyCode::Right, KeyCode::D]) {
-        game_state.magnitude.0 += MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
-        game_state.magnitude.1 = true;
+        game_state.magnitude += MAGNITUDE_CHANGING_SPEED * engine.delta_f32;
     }
-    game_state.magnitude.0 = game_state.magnitude.0.clamp(0.0, 25.0);
-
+    game_state.magnitude = game_state.magnitude.clamp(0.0, 25.0);
 }

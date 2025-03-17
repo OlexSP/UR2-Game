@@ -30,7 +30,7 @@ The game was made according to the Ultimate Rust 2 course [scenario](https://git
 
 2.  **Run the Game:**
     ```
-    cargo run
+    cargo run --release
     ```
 
 ## Controls
@@ -39,7 +39,7 @@ The game was made according to the Ultimate Rust 2 course [scenario](https://git
 * **Down/S:** Decrease cannon barrel angle.
 * **Left/A:** Decrease projectile magnitude.
 * **Right/D:** Increase projectile magnitude.
-* **Space/Left Mouse Button:** Fire the cannon.
+* **Space/Middle Mouse Button:** Fire the cannon.
 
 ## Project Structure
 ```

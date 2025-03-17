@@ -7,9 +7,10 @@ pub const MAGNITUDE_CHANGING_SPEED: f32 = 5.0;
 pub const ROTATION_SPEED: f32 = 0.5;
 
 // layers
-pub const BALL_LAYER: f32 = 1.0;
-pub const CANON_LAYER: f32 = 2.0;
-pub const TEXT_LAYER: f32 = 3.0;
+pub const BALL_LAYER: f32 = 2.0;
+pub const CANON_LAYER: f32 = 3.0;
+pub const TEXT_LAYER: f32 = 4.0;
+pub const WALL_LAYER: f32 = 1.0;
 
 // ball constants
 pub const BALL_X_MAX: f32 = 750.0;

@@ -57,8 +57,8 @@ fn spawn_ball(
     cannon_ball.collision = true;
 
     game_state.ball_velocity = Vec2::new(
-        game_state.magnitude.0 * MAGNITUDE_MULTIPLIER * c_rotation.cos(),
-        game_state.magnitude.0 * MAGNITUDE_MULTIPLIER * c_rotation.sin(),
+        game_state.magnitude * MAGNITUDE_MULTIPLIER * c_rotation.cos(),
+        game_state.magnitude * MAGNITUDE_MULTIPLIER * c_rotation.sin(),
     );
 
     engine.audio_manager.play_sfx(SfxPreset::Click, 0.2);
